@@ -35,8 +35,10 @@ if GEMINI_API_KEY:
         genai.configure(api_key=GEMINI_API_KEY)
         model = genai.GenerativeModel('gemini-1.5-flash')
     except Exception as e:
+        print(f"Failed to initialize Gemini: {e}")
         model = None
 else:
+    print("GEMINI_API_KEY is missing or empty!")
     model = None
 
 def get_google_client():
@@ -122,7 +124,7 @@ def fetch_news_to_sheet(ws_planning, ws_memory):
     
     added_count = 0
     for article in all_articles:
-        if added_count >= 5: break
+        if added_count >= 1: break
         
         title = article.title.rsplit(" - ", 1)[0] if " - " in article.title else article.title
         if title in all_existing: continue
@@ -216,6 +218,7 @@ def process_new_rows(ws_planning, ws_memory):
                     print(f"AI Parse Error: {e}")
                     ai_data = {"format": "SINGLE", "headline": topic[:50], "summaries": ["Read more below!"], "caption": "Check out this news! 🚀", "hashtags": "#Tech #News", "tag": "NEWS"}
             else:
+                print("Skipping AI Generation because model is None")
                 ai_data = {"format": "SINGLE", "headline": topic[:50], "summaries": ["Read more below!"], "caption": "Check out this news! 🚀", "hashtags": "#Tech #News", "tag": "NEWS"}
             
             r = requests.get(bg_url, stream=True)
