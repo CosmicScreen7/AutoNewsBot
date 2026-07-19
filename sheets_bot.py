@@ -288,15 +288,18 @@ def process_new_rows(ws_planning, ws_memory):
                                     break
                             except Exception as model_e:
                                 print(f"Model {model_name} failed: {model_e}")
+                                last_error = str(model_e)
                                 
                     except Exception as e:
                         print(f"Gemini Exception: {e}")
-                        with open("output/gemini_error.txt", "a") as err_f:
-                            err_f.write(f"Slide {idx} Error: {e}\n")
+                        last_error = str(e)
                             
                 if not success:
                     print(f"Image generation failed for slide {idx}. Skipping this topic.")
                     ws_planning.update_cell(i+1, 12, "FAILED_IMAGE")
+                    ws_planning.update_cell(i+1, 13, last_error[:500] if 'last_error' in locals() else "Unknown Error")
+                    with open("output/gemini_error.txt", "a") as err_f:
+                        err_f.write(f"Slide {idx} Error: {last_error if 'last_error' in locals() else 'Unknown'}\n")
                     images_failed = True
                     break
                         
