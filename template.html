@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Template</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --width: 1080px;
+            --height: 1350px; /* Instagram Portrait size */
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            width: var(--width);
+            height: var(--height);
+            display: flex;
+            background-color: #000;
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+        .background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            /* Placeholder for dynamic injection */
+            background-image: url('https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=1080&auto=format&fit=crop'); 
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 65%;
+            background: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 45%, rgba(0,0,0,0) 100%);
+            z-index: 2;
+        }
+        
+        .content {
+            position: absolute;
+            bottom: 80px;
+            left: 80px;
+            right: 80px;
+            z-index: 3;
+            color: #fff;
+        }
+        
+        .tag {
+            display: inline-block;
+            background: linear-gradient(90deg, #ff416c 0%, #ff4b2b 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 28px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 20px rgba(255, 65, 108, 0.4);
+        }
+        
+        .headline {
+            font-size: 75px;
+            font-weight: 800;
+            line-height: 1.15;
+            margin: 0;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.6);
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .footer {
+            position: absolute;
+            top: 60px;
+            left: 80px;
+            right: 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 3;
+        }
+        
+        .logo {
+            font-size: 40px;
+            font-weight: 800;
+            color: white;
+            letter-spacing: 1px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: #fff;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-size: 30px;
+        }
+        
+        .swipe-hint {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-size: 24px;
+            font-weight: 600;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        /* Glassmorphism subtle touches */
+        .glass-panel {
+            margin-top: 35px;
+            padding: 25px 30px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-left: 6px solid #ff416c;
+            border-radius: 0 15px 15px 0;
+            font-family: 'Inter', sans-serif;
+            font-size: 32px;
+            color: #e0e0e0;
+            line-height: 1.4;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-left: 6px solid #ff416c;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Layer -->
+    <div class="background" id="bg-layer"></div>
+    <div class="overlay"></div>
+    
+    <!-- Top Bar -->
+    <div class="footer">
+        <div class="logo">
+            <div class="logo-icon">📰</div>
+            NewsAI
+        </div>
+        <div class="swipe-hint">
+            Swipe <span style="font-size: 30px;">→</span>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="content">
+        <div class="tag" id="tag-text">TRENDING</div>
+        <h1 class="headline" id="title-text">
+            Google's New AI Breaks Records: The Future of Automation is Here Today
+        </h1>
+        
+        <div class="glass-panel" id="summary-text">
+            Experts predict massive shifts in the tech industry as generative AI models become faster and more reliable than ever before.
+        </div>
+    </div>
+</body>
+</html>

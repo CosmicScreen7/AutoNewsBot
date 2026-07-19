@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carousel Layout - Slide 1</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-blue: #009eed;
+            --brand-black: #080808;
+            --brand-white: #ffffff;
+            --width: 1080px;
+            --height: 1350px;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            width: var(--width);
+            height: var(--height);
+            display: flex;
+            background-color: var(--brand-black);
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            background-image: url('https://images.unsplash.com/photo-1556761175-5973dc0f32d7?q=80&w=1080&auto=format&fit=crop'); 
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 70%;
+            background: linear-gradient(to top, rgba(8,8,8,1) 0%, rgba(8,8,8,0.85) 40%, rgba(8,8,8,0) 100%);
+            z-index: 2;
+        }
+        
+        /* Top Left Logo (Replaces "BUSINESS" tag from reference) */
+        .top-left-logo {
+            position: absolute;
+            top: 60px;
+            left: 60px;
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--brand-blue);
+            padding: 12px 25px;
+            border-radius: 4px;
+            box-shadow: 0 10px 20px rgba(0, 158, 237, 0.4);
+        }
+        
+        .logo-icon {
+            font-size: 28px;
+            color: white;
+        }
+        
+        .logo-text {
+            color: white;
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+        
+        /* Bottom Content Area */
+        .bottom-content {
+            position: absolute;
+            bottom: 80px;
+            left: 60px;
+            right: 60px;
+            z-index: 3;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        
+        .text-group {
+            width: 75%;
+        }
+        
+        .headline {
+            color: var(--brand-white);
+            font-size: 70px;
+            font-weight: 800;
+            line-height: 1.25;
+            margin: 0 0 25px 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .accent-line {
+            width: 80px;
+            height: 6px;
+            background-color: var(--brand-blue);
+            margin-bottom: 25px;
+            box-shadow: 0 0 10px rgba(0, 158, 237, 0.5);
+        }
+        
+        /* Bottom Left Category (Replaces Date from reference) */
+        .category-text {
+            color: rgba(255, 255, 255, 0.9);
+            font-family: 'Inter', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        
+        /* Bottom Right Arrow Button */
+        .swipe-button {
+            width: 120px;
+            height: 120px;
+            background-color: var(--brand-blue);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 50px;
+            box-shadow: 0 15px 30px rgba(0, 158, 237, 0.4);
+            margin-bottom: 5px; /* Align nicely with text bottom */
+        }
+    </style>
+</head>
+<body>
+    <div class="background" id="bg-layer"></div>
+    <div class="overlay"></div>
+    
+    <!-- Top Left Logo -->
+    <div class="top-left-logo">
+        <div class="logo-icon">🌐</div>
+        <div class="logo-text">INFIZY</div>
+    </div>
+    
+    <!-- Bottom Content -->
+    <div class="bottom-content">
+        <div class="text-group">
+            <h1 class="headline" id="title-text">Startups Raise Record Funding in Q2 2025 Due to AI Boom</h1>
+            <div class="accent-line"></div>
+            <div class="category-text" id="tag-text">BUSINESS</div>
+        </div>
+        
+        <!-- Swipe Button -->
+        <div class="swipe-button">
+            →
+        </div>
+    </div>
+</body>
+</html>

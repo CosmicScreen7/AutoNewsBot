@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carousel Layout - Slide 3</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-blue: #009eed;
+            --brand-black: #080808;
+            --brand-white: #ffffff;
+            --width: 1080px;
+            --height: 1350px;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            width: var(--width);
+            height: var(--height);
+            display: flex;
+            flex-direction: column;
+            background-color: var(--brand-black);
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
+            padding: 80px;
+            box-sizing: border-box;
+        }
+        
+        .top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 50px;
+        }
+        
+        .logo-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo-icon {
+            font-size: 32px;
+            color: var(--brand-blue);
+        }
+        .logo-text {
+            color: white;
+            font-size: 38px;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+        }
+        
+        .tag {
+            background-color: var(--brand-blue);
+            color: var(--brand-white);
+            padding: 12px 25px;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        
+        .headline {
+            color: var(--brand-white);
+            font-size: 72px;
+            font-weight: 900;
+            line-height: 1.15;
+            margin: 0 0 50px 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .image-box {
+            width: 100%;
+            flex-grow: 1;
+            background-image: url('https://images.unsplash.com/photo-1556761175-5973dc0f32d7?q=80&w=1080&auto=format&fit=crop'); 
+            background-size: cover;
+            background-position: center;
+            border: 8px solid var(--brand-white);
+            position: relative;
+            box-shadow: -25px 25px 0 var(--brand-blue);
+        }
+        
+        .swipe-button {
+            position: absolute;
+            bottom: -30px;
+            right: -30px;
+            width: 120px;
+            height: 120px;
+            background-color: var(--brand-blue);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 55px;
+            border: 8px solid var(--brand-black);
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-row">
+        <div class="logo-bar">
+            <div class="logo-icon">🌐</div>
+            <div class="logo-text">INFIZY</div>
+        </div>
+        <div class="tag" id="tag-text">BUSINESS</div>
+    </div>
+    
+    <h1 class="headline" id="title-text">Startups Raise Record Funding in Q2 2025 Due to AI Boom</h1>
+    
+    <div class="image-box" id="bg-layer">
+        <div class="swipe-button">
+            →
+        </div>
+    </div>
+</body>
+</html>

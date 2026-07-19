@@ -1,0 +1,46 @@
+name: AutoNewsBot Daily Automation
+
+on:
+  schedule:
+    # Runs every 4 hours (adjust as needed)
+    - cron: '0 */4 * * *'
+  workflow_dispatch: # Allows manual triggering from GitHub UI
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        playwright install chromium
+        playwright install-deps chromium
+
+    - name: Run AutoNewsBot
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+        EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+        EMAIL_APP_PASSWORD: ${{ secrets.EMAIL_APP_PASSWORD }}
+        EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
+      run: |
+        python sheets_bot.py
+
+    - name: Commit and Push State Changes
+      run: |
+        git config --global user.name "AutoNewsBot"
+        git config --global user.email "bot@infizy.com"
+        git add state.txt output/ || true
+        git commit -m "Auto-update state and save output image" || true
+        git push || true
