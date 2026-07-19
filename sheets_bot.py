@@ -157,9 +157,18 @@ def parse_ai_response(res):
         tag = re.search(r"TAG:\s*(.*)", res).group(1).strip().upper()
     except: tag = "TECH NEWS"
     
-    try:
-        img_prompt = re.search(r"IMAGE_PROMPT:\s*(.*)", res).group(1).strip()
-    except: img_prompt = "A high tech futuristic abstract background with dark blue and purple neon lights"
+    img_prompts = []
+    for i in range(1, 6):
+        match = re.search(f"IMAGE_PROMPT_{i}:\s*(.*?)(?=IMAGE_PROMPT_\d:|SUMMARY_\d:|CAPTION:|\Z)", res, re.IGNORECASE | re.DOTALL)
+        if match and match.group(1).strip():
+            img_prompts.append(match.group(1).strip())
+            
+    if not img_prompts:
+        try:
+            single = re.search(r"IMAGE_PROMPT:\s*(.*?)(?=\n)", res).group(1).strip()
+            img_prompts = [single] * 5
+        except:
+            img_prompts = ["A realistic news background"] * 5
     
     summaries = []
     for i in range(1, 5):
@@ -170,7 +179,7 @@ def parse_ai_response(res):
     if not summaries:
         summaries = ["Read the full story in the caption below!"]
         
-    return {"format": f, "headline": h, "summaries": summaries, "caption": c, "hashtags": t, "tag": tag, "image_prompt": img_prompt}
+    return {"format": f, "headline": h, "summaries": summaries, "caption": c, "hashtags": t, "tag": tag, "img_prompts": img_prompts}
 
 def process_new_rows(ws_planning, ws_memory):
     rows = ws_planning.get_all_values()
@@ -217,7 +226,11 @@ def process_new_rows(ws_planning, ws_memory):
                 CAPTION: [Instagram caption with emojis, max 3 sentences]
                 HASHTAGS: [5 relevant hashtags]
                 TAG: [1-2 word category, e.g., AI, STARTUP, BREAKING]
-                IMAGE_PROMPT: [A hyper-detailed, extremely eye-catching, cinematic 3D render or highly realistic dramatic photography representing the news. Use natural but striking lighting to make it look premium and stop scrollers. Do NOT include any text, letters, or numbers in the image prompt.]
+                IMAGE_PROMPT_1: [Image prompt representing the HEADLINE. A hyper-detailed, extremely eye-catching, cinematic 3D render or highly realistic dramatic photography representing the news. Use natural but striking lighting to make it look premium. Do NOT include any text.]
+                IMAGE_PROMPT_2: [Image prompt representing SUMMARY_1. Leave blank if SINGLE]
+                IMAGE_PROMPT_3: [Image prompt representing SUMMARY_2. Leave blank if SINGLE or not needed]
+                IMAGE_PROMPT_4: [Image prompt representing SUMMARY_3. Leave blank if not needed]
+                IMAGE_PROMPT_5: [Image prompt representing SUMMARY_4. Leave blank if not needed]
                 """
                 try:
                     res = model.generate_content(prompt).text
@@ -229,14 +242,23 @@ def process_new_rows(ws_planning, ws_memory):
                 print("Skipping AI Generation because model is None")
                 ai_data = {"format": "SINGLE", "headline": topic[:50], "summaries": ["Read more below!"], "caption": "Check out this news! 🚀", "hashtags": "#Tech #News", "tag": "NEWS", "image_prompt": "A futuristic technology background"}
             
-            encoded_prompt = urllib.parse.quote(ai_data['image_prompt'])
-            bg_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1080&height=1350&nologo=true"
-            r = requests.get(bg_url, stream=True)
-            bg_path = os.path.abspath("background.jpg")
-            with open(bg_path, 'wb') as f:
-                for chunk in r.iter_content(1024): f.write(chunk)
+            bg_paths = []
+            for idx, img_prompt in enumerate(ai_data['img_prompts']):
+                encoded_prompt = urllib.parse.quote(img_prompt)
+                bg_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1080&height=1350&nologo=true"
+                bg_path = os.path.abspath(f"background_{idx}.jpg")
+                try:
+                    r = requests.get(bg_url, stream=True)
+                    if r.status_code == 200:
+                        with open(bg_path, 'wb') as f:
+                            for chunk in r.iter_content(1024): f.write(chunk)
+                        bg_paths.append(bg_path)
+                except Exception as e:
+                    print(f"Image Download Error: {e}")
+                    
+            if not bg_paths: bg_paths = [os.path.abspath("background_0.jpg")]
                 
-            img = Image.open(bg_path).convert('L')
+            img = Image.open(bg_paths[0]).convert('L')
             is_dark = ImageStat.Stat(img.crop((0,0,200,200))).mean[0] < 120
             
             safe_title = "".join([c for c in ai_data['headline'] if c.isalnum()]).replace(" ", "_")[:20]
@@ -251,15 +273,18 @@ def process_new_rows(ws_planning, ws_memory):
                     with open(template_path, 'r', encoding='utf-8') as f: html_content = f.read()
                     
                     total_slides = 1 + len(ai_data['summaries'])
-                    slides = [{"body_class": "slide-type-1", "seq": f"1/{total_slides}", "title": ai_data['headline'], "summary": ""}]
+                    slides = [{"body_class": "slide-type-1", "seq": f"1/{total_slides}", "title": ai_data['headline'], "summary": "", "bg": bg_paths[0], "is_last": False}]
                     
                     for idx, summary in enumerate(ai_data['summaries']):
                         is_last = (idx == len(ai_data['summaries']) - 1)
+                        bg = bg_paths[idx+1] if (idx+1) < len(bg_paths) else bg_paths[-1]
                         slides.append({
                             "body_class": "slide-type-n last-slide" if is_last else "slide-type-n",
                             "seq": f"{idx+2}/{total_slides}",
                             "title": "",
-                            "summary": summary + ("\\n\\nRead Caption ↓" if is_last else "")
+                            "summary": summary,
+                            "is_last": is_last,
+                            "bg": bg
                         })
                     
                     for slide_idx, slide_data in enumerate(slides):
@@ -270,12 +295,20 @@ def process_new_rows(ws_planning, ws_memory):
                         if slide_idx == 0:
                             if soup.find(id="title-text"): soup.find(id="title-text").string = slide_data["title"]
                         else:
-                            if soup.find(id="summary-text"): soup.find(id="summary-text").string = slide_data["summary"]
+                            summary_tag = soup.find(id="summary-text")
+                            if summary_tag:
+                                summary_tag.clear()
+                                summary_tag.append(slide_data["summary"])
+                                if slide_data.get("is_last"):
+                                    summary_tag.append(soup.new_tag("br"))
+                                    summary_tag.append(soup.new_tag("br"))
+                                    summary_tag.append("Read Caption ↓")
                             
                         if soup.find(id="tag-text"): soup.find(id="tag-text").string = ai_data['tag']
                         
                         bg_layer = soup.find(id="bg-layer")
-                        if bg_layer: bg_layer['style'] = f"background-image: url('file:///{bg_path.replace(chr(92), '/')}') !important;"
+                        bg_img_path = slide_data["bg"].replace(chr(92), '/')
+                        if bg_layer: bg_layer['style'] = f"background-image: url('file:///{bg_img_path}') !important;"
                         
                         if is_dark:
                             style_tag = soup.new_tag("style")
@@ -293,21 +326,23 @@ def process_new_rows(ws_planning, ws_memory):
                         raw_url = f"https://raw.githubusercontent.com/CosmicScreen7/AutoNewsBot/main/{final_img}"
                         generated_images.append(raw_url)
                         page.close()
-                else: # SINGLE
-                    # Pick random single template
-                    template_path = random.choice(["final_templates/template_single_1.html", "final_templates/template_single_2.html"])
+                elif ai_data['format'] == "SINGLE":
+                    template_path = "final_templates/template_single_1.html"
                     with open(template_path, 'r', encoding='utf-8') as f: html_content = f.read()
                     
                     soup = BeautifulSoup(html_content, 'html.parser')
                     if soup.find(id="title-text"): soup.find(id="title-text").string = ai_data['headline']
-                    
-                    # Combine summaries into one for single post
-                    comb_sum = " ".join(ai_data['summaries'])
-                    if soup.find(id="summary-text"): soup.find(id="summary-text").string = comb_sum
+                    if soup.find(id="summary-text"): 
+                        summary_tag = soup.find(id="summary-text")
+                        summary_tag.clear()
+                        for line in ai_data['summaries'][0].split('\n'):
+                            summary_tag.append(line)
+                            summary_tag.append(soup.new_tag("br"))
                     if soup.find(id="tag-text"): soup.find(id="tag-text").string = ai_data['tag']
                     
                     bg_layer = soup.find(id="bg-layer")
-                    if bg_layer: bg_layer['style'] = f"background-image: url('file:///{bg_path.replace(chr(92), '/')}') !important;"
+                    bg_img_path = bg_paths[0].replace(chr(92), '/')
+                    if bg_layer: bg_layer['style'] = f"background-image: url('file:///{bg_img_path}') !important;"
                     
                     if is_dark:
                         style_tag = soup.new_tag("style")
