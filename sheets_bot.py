@@ -332,6 +332,10 @@ def process_new_rows(ws_planning, ws_memory):
                 
             ws_planning.update_cell(i+1, 9, ai_data['caption'])
             ws_planning.update_cell(i+1, 10, ai_data['hashtags'])
+            
+            post_time = (datetime.datetime.now() + datetime.timedelta(hours=1)).strftime("%I:%M %p")
+            ws_planning.update_cell(i+1, 11, post_time)
+            
             ws_planning.update_cell(i+1, 12, "READY_TO_POST")
             
             ws_memory.append_row([timestamp, topic, ai_data['headline']])
