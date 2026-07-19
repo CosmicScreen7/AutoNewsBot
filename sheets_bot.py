@@ -226,6 +226,9 @@ def process_new_rows(ws_planning, ws_memory):
                 CAPTION: [Instagram caption with emojis, max 3 sentences]
                 HASHTAGS: [8 to 12 highly relevant and trending hashtags]
                 TAG: [1-2 word category, e.g., AI, STARTUP, BREAKING]
+                
+                CRITICAL SAFETY FILTER: Gemini will BLOCK images if you use unsafe words. YOU MUST NOT use any words related to blood, violence, gore, weapons, specific real-world political figures, or explicit content in the IMAGE_PROMPTs. Use safe conceptual descriptions instead.
+                
                 IMAGE_PROMPT_1: [Image prompt representing the HEADLINE. A true visual masterpiece, extremely attractive, striking composition, highly realistic cinematic photography representing the news. Use phenomenal lighting and solid bold visuals to make it look breathtaking. Do NOT include any text or letters.]
                 IMAGE_PROMPT_2: [Image prompt representing SUMMARY_1. Leave blank if SINGLE]
                 IMAGE_PROMPT_3: [Image prompt representing SUMMARY_2. Leave blank if SINGLE or not needed]
@@ -244,17 +247,49 @@ def process_new_rows(ws_planning, ws_memory):
             
             bg_paths = []
             for idx, img_prompt in enumerate(ai_data['img_prompts']):
-                encoded_prompt = urllib.parse.quote(img_prompt)
-                bg_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1080&height=1350&nologo=true"
                 bg_path = os.path.abspath(f"background_{idx}.jpg")
-                try:
-                    r = requests.get(bg_url, stream=True)
-                    if r.status_code == 200:
-                        with open(bg_path, 'wb') as f:
-                            for chunk in r.iter_content(1024): f.write(chunk)
-                        bg_paths.append(bg_path)
-                except Exception as e:
-                    print(f"Image Download Error: {e}")
+                success = False
+                
+                # 1. Try Gemini Imagen 3
+                if GEMINI_API_KEY:
+                    try:
+                        gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key={GEMINI_API_KEY}"
+                        payload = {
+                            "instances": [{"prompt": img_prompt}],
+                            "parameters": {"sampleCount": 1, "aspectRatio": "3:4"}
+                        }
+                        headers = {"Content-Type": "application/json"}
+                        r = requests.post(gemini_url, json=payload, headers=headers)
+                        if r.status_code == 200:
+                            data = r.json()
+                            if "predictions" in data and len(data["predictions"]) > 0:
+                                b64 = data["predictions"][0].get("bytesBase64Encoded")
+                                if b64:
+                                    import base64
+                                    with open(bg_path, 'wb') as f:
+                                        f.write(base64.b64decode(b64))
+                                    success = True
+                        else:
+                            print(f"Gemini API Error: {r.text}")
+                    except Exception as e:
+                        print(f"Gemini Exception: {e}")
+                
+                # 2. Fallback to Pollinations AI
+                if not success:
+                    print(f"Falling back to Pollinations AI for slide {idx}...")
+                    encoded_prompt = urllib.parse.quote(img_prompt)
+                    bg_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1080&height=1350&nologo=true"
+                    try:
+                        r = requests.get(bg_url, stream=True)
+                        if r.status_code == 200:
+                            with open(bg_path, 'wb') as f:
+                                for chunk in r.iter_content(1024): f.write(chunk)
+                            success = True
+                    except Exception as e:
+                        print(f"Image Download Error: {e}")
+                        
+                if success:
+                    bg_paths.append(bg_path)
                     
             if not bg_paths: bg_paths = [os.path.abspath("background_0.jpg")]
                 
