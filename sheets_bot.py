@@ -255,20 +255,36 @@ def process_new_rows(ws_planning, ws_memory):
                     try:
                         from google import genai
                         client = genai.Client(api_key=GEMINI_API_KEY)
-                        result = client.models.generate_images(
-                            model='imagen-4.0-ultra-generate-001',
-                            prompt=img_prompt,
-                            config=dict(
-                                number_of_images=1,
-                                aspect_ratio="3:4"
-                            )
-                        )
-                        for generated_image in result.generated_images:
-                            image_bytes = generated_image.image.image_bytes
-                            with open(bg_path, 'wb') as f:
-                                f.write(image_bytes)
-                            success = True
-                            break
+                        
+                        models_to_try = [
+                            'imagen-4.0-ultra-generate-001',
+                            'imagen-4.0-ultra-generate',
+                            'imagen-4-ultra-generate',
+                            'imagen-3.0-generate-001'
+                        ]
+                        
+                        for model_name in models_to_try:
+                            try:
+                                result = client.models.generate_images(
+                                    model=model_name,
+                                    prompt=img_prompt,
+                                    config=dict(
+                                        number_of_images=1,
+                                        aspect_ratio="3:4"
+                                    )
+                                )
+                                for generated_image in result.generated_images:
+                                    image_bytes = generated_image.image.image_bytes
+                                    with open(bg_path, 'wb') as f:
+                                        f.write(image_bytes)
+                                    success = True
+                                    break
+                                if success:
+                                    print(f"Successfully generated with model: {model_name}")
+                                    break
+                            except Exception as model_e:
+                                print(f"Model {model_name} failed: {model_e}")
+                                
                     except Exception as e:
                         print(f"Gemini Exception: {e}")
                         with open("output/gemini_error.txt", "a") as err_f:
