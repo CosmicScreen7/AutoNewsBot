@@ -1,0 +1,14 @@
+layout_carousel_*.html
+layout_single_*.html
+template.html
+generated_post.html
+test_*.jpg
+test_*.png
+final_post.jpg
+background.jpg
+instagram_grid_preview.jpg
+grid_preview.html
+state.txt
+output/
+__pycache__/
+.env
