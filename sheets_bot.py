@@ -253,24 +253,22 @@ def process_new_rows(ws_planning, ws_memory):
                 # 1. Try Gemini Imagen 3
                 if GEMINI_API_KEY:
                     try:
-                        gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key={GEMINI_API_KEY}"
-                        payload = {
-                            "instances": [{"prompt": img_prompt}],
-                            "parameters": {"sampleCount": 1, "aspectRatio": "3:4"}
-                        }
-                        headers = {"Content-Type": "application/json"}
-                        r = requests.post(gemini_url, json=payload, headers=headers)
-                        if r.status_code == 200:
-                            data = r.json()
-                            if "predictions" in data and len(data["predictions"]) > 0:
-                                b64 = data["predictions"][0].get("bytesBase64Encoded")
-                                if b64:
-                                    import base64
-                                    with open(bg_path, 'wb') as f:
-                                        f.write(base64.b64decode(b64))
-                                    success = True
-                        else:
-                            print(f"Gemini API Error: {r.text}")
+                        from google import genai
+                        client = genai.Client(api_key=GEMINI_API_KEY)
+                        result = client.models.generate_images(
+                            model='imagen-3.0-generate-002',
+                            prompt=img_prompt,
+                            config=dict(
+                                number_of_images=1,
+                                aspect_ratio="3:4"
+                            )
+                        )
+                        for generated_image in result.generated_images:
+                            image_bytes = generated_image.image.image_bytes
+                            with open(bg_path, 'wb') as f:
+                                f.write(image_bytes)
+                            success = True
+                            break
                     except Exception as e:
                         print(f"Gemini Exception: {e}")
                 
