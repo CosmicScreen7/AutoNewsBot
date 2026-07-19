@@ -5,3 +5,5 @@ playwright==1.61.0
 requests==2.32.5
 google-generativeai
 python-dotenv
+gspread
+oauth2client
