@@ -280,7 +280,8 @@ def process_new_rows(ws_planning, ws_memory):
                         page.goto(f"file:///{os.path.abspath(out_html)}")
                         page.wait_for_timeout(1000)
                         page.screenshot(path=final_img, type='jpeg', quality=95)
-                        generated_images.append(final_img)
+                        raw_url = f"https://raw.githubusercontent.com/CosmicScreen7/AutoNewsBot/main/{final_img}"
+                        generated_images.append(raw_url)
                         page.close()
                 else: # SINGLE
                     # Pick random single template
@@ -311,7 +312,8 @@ def process_new_rows(ws_planning, ws_memory):
                     page.goto(f"file:///{os.path.abspath(out_html)}")
                     page.wait_for_timeout(2000)
                     page.screenshot(path=final_img, type='jpeg', quality=95)
-                    generated_images.append(final_img)
+                    raw_url = f"https://raw.githubusercontent.com/CosmicScreen7/AutoNewsBot/main/{final_img}"
+                    generated_images.append(raw_url)
                     page.close()
                 
                 browser.close()
