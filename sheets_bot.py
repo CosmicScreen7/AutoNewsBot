@@ -196,6 +196,9 @@ def process_new_rows(ws_planning, ws_memory):
                 If the news is deep and requires explanation, choose CAROUSEL. If it's a quick update, choose SINGLE.
                 
                 STEP 2: Write the content based on strict MIN/MAX word limits.
+                Make the HEADLINE an extreme "SCROLL-STOPPING HOOK" (e.g. "The Untold Truth About X", "Why Y is Doomed"). It must create immense curiosity.
+                Make the SUMMARY punchy and engaging, avoiding boring journalistic tones.
+                
                 If CAROUSEL:
                 - HEADLINE: Min 4, Max 10 words.
                 - SUMMARY_X: Provide 2 to 4 summary points. Each point MUST be Min 10, Max 15 words.
@@ -206,7 +209,7 @@ def process_new_rows(ws_planning, ws_memory):
                 
                 Provide exactly this output structure:
                 FORMAT: [SINGLE or CAROUSEL]
-                HEADLINE: [Your Headline]
+                HEADLINE: [Your Hook Headline]
                 SUMMARY_1: [Point 1]
                 SUMMARY_2: [Point 2. Leave blank if SINGLE or not needed]
                 SUMMARY_3: [Point 3. Leave blank if not needed]
@@ -214,7 +217,7 @@ def process_new_rows(ws_planning, ws_memory):
                 CAPTION: [Instagram caption with emojis, max 3 sentences]
                 HASHTAGS: [5 relevant hashtags]
                 TAG: [1-2 word category, e.g., AI, STARTUP, BREAKING]
-                IMAGE_PROMPT: [A highly detailed, hyper-realistic, dark-themed image prompt representing the news visually. Do NOT include any text in the image prompt.]
+                IMAGE_PROMPT: [A hyper-detailed, extremely eye-catching, cinematic 3D render or dramatic photography representing the news. Use vivid neon lighting (blue/purple/magenta) to make it pop and stop scrollers. Do NOT include any text, letters, or numbers in the image prompt.]
                 """
                 try:
                     res = model.generate_content(prompt).text
