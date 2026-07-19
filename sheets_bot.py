@@ -258,6 +258,7 @@ def process_new_rows(ws_planning, ws_memory):
                         client = genai.Client(api_key=GEMINI_API_KEY)
                         
                         models_to_try = [
+                            'antigravity',
                             'imagen-4.0-ultra-generate-001',
                             'imagen-4.0-ultra-generate',
                             'imagen-4.0-generate-001',
