@@ -41,6 +41,7 @@ jobs:
       run: |
         git config --global user.name "AutoNewsBot"
         git config --global user.email "bot@infizy.com"
-        git add state.txt output/ || true
-        git commit -m "Auto-update state and save output image" || true
-        git push || true
+        git status
+        git add output/
+        git commit -m "Auto-update state and save output image" || echo "No changes to commit"
+        git push
