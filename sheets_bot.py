@@ -217,7 +217,7 @@ def process_new_rows(ws_planning, ws_memory):
                 CAPTION: [Instagram caption with emojis, max 3 sentences]
                 HASHTAGS: [5 relevant hashtags]
                 TAG: [1-2 word category, e.g., AI, STARTUP, BREAKING]
-                IMAGE_PROMPT: [A hyper-detailed, extremely eye-catching, cinematic 3D render or dramatic photography representing the news. Use vivid neon lighting (blue/purple/magenta) to make it pop and stop scrollers. Do NOT include any text, letters, or numbers in the image prompt.]
+                IMAGE_PROMPT: [A hyper-detailed, extremely eye-catching, cinematic 3D render or highly realistic dramatic photography representing the news. Use natural but striking lighting to make it look premium and stop scrollers. Do NOT include any text, letters, or numbers in the image prompt.]
                 """
                 try:
                     res = model.generate_content(prompt).text
