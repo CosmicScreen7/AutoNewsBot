@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup
 from PIL import Image, ImageStat
 from playwright.sync_api import sync_playwright
 from dotenv import load_dotenv
+import urllib.parse
 
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
@@ -156,6 +157,10 @@ def parse_ai_response(res):
         tag = re.search(r"TAG:\s*(.*)", res).group(1).strip().upper()
     except: tag = "TECH NEWS"
     
+    try:
+        img_prompt = re.search(r"IMAGE_PROMPT:\s*(.*)", res).group(1).strip()
+    except: img_prompt = "A high tech futuristic abstract background with dark blue and purple neon lights"
+    
     summaries = []
     for i in range(1, 5):
         match = re.search(f"SUMMARY_{i}:\s*(.*)", res)
@@ -165,11 +170,10 @@ def parse_ai_response(res):
     if not summaries:
         summaries = ["Read the full story in the caption below!"]
         
-    return {"format": f, "headline": h, "summaries": summaries, "caption": c, "hashtags": t, "tag": tag}
+    return {"format": f, "headline": h, "summaries": summaries, "caption": c, "hashtags": t, "tag": tag, "image_prompt": img_prompt}
 
 def process_new_rows(ws_planning, ws_memory):
     rows = ws_planning.get_all_values()
-    bg_url = "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1080&auto=format&fit=crop"
     os.makedirs("output", exist_ok=True)
     
     memory_history = ws_memory.get_all_values()
@@ -210,6 +214,7 @@ def process_new_rows(ws_planning, ws_memory):
                 CAPTION: [Instagram caption with emojis, max 3 sentences]
                 HASHTAGS: [5 relevant hashtags]
                 TAG: [1-2 word category, e.g., AI, STARTUP, BREAKING]
+                IMAGE_PROMPT: [A highly detailed, hyper-realistic, dark-themed image prompt representing the news visually. Do NOT include any text in the image prompt.]
                 """
                 try:
                     res = model.generate_content(prompt).text
@@ -219,8 +224,10 @@ def process_new_rows(ws_planning, ws_memory):
                     ai_data = {"format": "SINGLE", "headline": topic[:50], "summaries": ["Read more below!"], "caption": "Check out this news! 🚀", "hashtags": "#Tech #News", "tag": "NEWS"}
             else:
                 print("Skipping AI Generation because model is None")
-                ai_data = {"format": "SINGLE", "headline": topic[:50], "summaries": ["Read more below!"], "caption": "Check out this news! 🚀", "hashtags": "#Tech #News", "tag": "NEWS"}
+                ai_data = {"format": "SINGLE", "headline": topic[:50], "summaries": ["Read more below!"], "caption": "Check out this news! 🚀", "hashtags": "#Tech #News", "tag": "NEWS", "image_prompt": "A futuristic technology background"}
             
+            encoded_prompt = urllib.parse.quote(ai_data['image_prompt'])
+            bg_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1080&height=1350&nologo=true"
             r = requests.get(bg_url, stream=True)
             bg_path = os.path.abspath("background.jpg")
             with open(bg_path, 'wb') as f:
