@@ -163,7 +163,7 @@ def parse_ai_response(res):
     
     summaries = []
     for i in range(1, 5):
-        match = re.search(f"SUMMARY_{i}:\s*(.*)", res)
+        match = re.search(f"SUMMARY_{i}:\s*(.*?)(?=SUMMARY_\d:|CAPTION:|\Z)", res, re.IGNORECASE | re.DOTALL)
         if match and match.group(1).strip():
             summaries.append(match.group(1).strip())
             
