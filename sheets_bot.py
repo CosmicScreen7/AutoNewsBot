@@ -256,7 +256,7 @@ def process_new_rows(ws_planning, ws_memory):
                         from google import genai
                         client = genai.Client(api_key=GEMINI_API_KEY)
                         result = client.models.generate_images(
-                            model='imagen-3.0-generate-001',
+                            model='imagen-4.0-ultra-generate-001',
                             prompt=img_prompt,
                             config=dict(
                                 number_of_images=1,
