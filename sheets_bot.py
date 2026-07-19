@@ -245,6 +245,7 @@ def process_new_rows(ws_planning, ws_memory):
                 print("Skipping AI Generation because model is None")
                 ai_data = {"format": "SINGLE", "headline": topic[:50], "summaries": ["Read more below!"], "caption": "Check out this news! 🚀", "hashtags": "#Tech #News", "tag": "NEWS", "image_prompt": "A futuristic technology background"}
             
+            images_failed = False
             bg_paths = []
             for idx, img_prompt in enumerate(ai_data['img_prompts']):
                 bg_path = os.path.abspath(f"background_{idx}.jpg")
@@ -289,24 +290,18 @@ def process_new_rows(ws_planning, ws_memory):
                         print(f"Gemini Exception: {e}")
                         with open("output/gemini_error.txt", "a") as err_f:
                             err_f.write(f"Slide {idx} Error: {e}\n")
-                
-                # 2. Fallback to Pollinations AI
+                            
                 if not success:
-                    print(f"Falling back to Pollinations AI for slide {idx}...")
-                    fallback_prompt = img_prompt + ", unreal engine 5, masterpiece, hyper-realistic, 8k resolution, cinematic lighting, photorealistic, highly detailed"
-                    encoded_prompt = urllib.parse.quote(fallback_prompt)
-                    bg_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1080&height=1350&nologo=true"
-                    try:
-                        r = requests.get(bg_url, stream=True)
-                        if r.status_code == 200:
-                            with open(bg_path, 'wb') as f:
-                                for chunk in r.iter_content(1024): f.write(chunk)
-                            success = True
-                    except Exception as e:
-                        print(f"Image Download Error: {e}")
+                    print(f"Image generation failed for slide {idx}. Skipping this topic.")
+                    ws_planning.update_cell(i+1, 12, "FAILED_IMAGE")
+                    images_failed = True
+                    break
                         
                 if success:
                     bg_paths.append(bg_path)
+                    
+            if images_failed:
+                continue
                     
             if not bg_paths: bg_paths = [os.path.abspath("background_0.jpg")]
                 
