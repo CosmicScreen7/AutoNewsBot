@@ -182,7 +182,18 @@ def parse_ai_response(res):
     return {"format": f, "headline": h, "summaries": summaries, "caption": c, "hashtags": t, "tag": tag, "img_prompts": img_prompts}
 
 def process_new_rows(ws_planning, ws_memory):
-    rows = ws_planning.get_all_values()
+    import requests
+    import json
+    
+    # Debug: Fetch all models for the API key to find the correct Imagen name
+    try:
+        r = requests.get(f"https://generativelanguage.googleapis.com/v1beta/models?key={GEMINI_API_KEY}")
+        with open("output/models.json", "w") as f:
+            f.write(r.text)
+    except:
+        pass
+        
+    rows = ws_planning.get_all_values()[1:]
     os.makedirs("output", exist_ok=True)
     
     memory_history = ws_memory.get_all_values()
