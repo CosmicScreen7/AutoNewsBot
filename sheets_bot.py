@@ -256,7 +256,7 @@ def process_new_rows(ws_planning, ws_memory):
                         from google import genai
                         client = genai.Client(api_key=GEMINI_API_KEY)
                         result = client.models.generate_images(
-                            model='imagen-3.0-generate-002',
+                            model='imagen-3.0-generate-001',
                             prompt=img_prompt,
                             config=dict(
                                 number_of_images=1,
@@ -271,11 +271,14 @@ def process_new_rows(ws_planning, ws_memory):
                             break
                     except Exception as e:
                         print(f"Gemini Exception: {e}")
+                        with open("output/gemini_error.txt", "a") as err_f:
+                            err_f.write(f"Slide {idx} Error: {e}\n")
                 
                 # 2. Fallback to Pollinations AI
                 if not success:
                     print(f"Falling back to Pollinations AI for slide {idx}...")
-                    encoded_prompt = urllib.parse.quote(img_prompt)
+                    fallback_prompt = img_prompt + ", unreal engine 5, masterpiece, hyper-realistic, 8k resolution, cinematic lighting, photorealistic, highly detailed"
+                    encoded_prompt = urllib.parse.quote(fallback_prompt)
                     bg_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1080&height=1350&nologo=true"
                     try:
                         r = requests.get(bg_url, stream=True)
