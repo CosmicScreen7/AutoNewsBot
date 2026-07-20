@@ -262,63 +262,59 @@ def process_new_rows(ws_planning, ws_memory):
                 bg_path = os.path.abspath(f"background_{idx}.jpg")
                 success = False
                 
-                # 1. Try Gemini Imagen 3
-                if GEMINI_API_KEY:
+                # 1. Try Hugging Face
+                hf_api_key = os.getenv("HF_API_KEY")
+                last_error = ""
+                if hf_api_key:
+                    hf_url = "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-schnell"
+                    headers = {"Authorization": f"Bearer {hf_api_key}"}
+                    
+                    for attempt in range(3):
+                        try:
+                            import requests
+                            response = requests.post(hf_url, headers=headers, json={"inputs": img_prompt})
+                            if response.status_code == 200:
+                                with open(bg_path, 'wb') as f:
+                                    f.write(response.content)
+                                success = True
+                                print(f"Successfully generated with Hugging Face FLUX")
+                                break
+                            elif response.status_code == 503:
+                                # Model is loading
+                                wait_time = 15
+                                try:
+                                    wait_time = float(response.json().get("estimated_time", 15))
+                                except: pass
+                                print(f"HF Model loading, waiting {wait_time}s...")
+                                import time
+                                time.sleep(wait_time)
+                            else:
+                                last_error = f"HF Error {response.status_code}: {response.text}"
+                                print(last_error)
+                                break
+                        except Exception as e:
+                            last_error = str(e)
+                            print(f"HF Exception: {e}")
+                            break
+                            
+                # 2. Ultimate Fallback to Pollinations AI
+                if not success:
+                    print("Falling back to Pollinations AI (FLUX)...")
                     try:
-                        import requests
-                        import base64
-                        
-                        models_to_try = [
-                            ('imagen-4.0-ultra-generate-001', 'generateContent'),
-                            ('imagen-4.0-ultra-generate-001', 'predict'),
-                            ('imagen-4.0-generate-001', 'generateContent'),
-                            ('imagen-4.0-generate-001', 'predict')
-                        ]
-                        
-                        last_error = ""
-                        for model_name, endpoint in models_to_try:
-                            try:
-                                url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:{endpoint}?key={GEMINI_API_KEY}"
-                                if endpoint == 'predict':
-                                    payload = {
-                                        "instances": [{"prompt": img_prompt}],
-                                        "parameters": {"sampleCount": 1, "aspectRatio": "3:4"}
-                                    }
-                                else:
-                                    payload = {
-                                        "contents": [{"parts": [{"text": img_prompt}]}]
-                                    }
-                                    
-                                r = requests.post(url, json=payload)
-                                if r.status_code == 200:
-                                    response_data = r.json()
-                                    if endpoint == 'predict' and "predictions" in response_data and len(response_data["predictions"]) > 0:
-                                        base64_str = response_data["predictions"][0]["bytesBase64Encoded"]
-                                    elif endpoint == 'generateContent' and "candidates" in response_data:
-                                        try:
-                                            base64_str = response_data["candidates"][0]["content"]["parts"][0]["inlineData"]["data"]
-                                        except KeyError:
-                                            raise Exception(f"Unexpected generateContent format: {r.text}")
-                                    else:
-                                        raise Exception(f"Unexpected response format: {r.text}")
-                                        
-                                    image_bytes = base64.b64decode(base64_str)
-                                    with open(bg_path, 'wb') as f:
-                                        f.write(image_bytes)
-                                    success = True
-                                    print(f"Successfully generated with model: {model_name}")
-                                    break
-                                else:
-                                    raise Exception(f"HTTP {r.status_code}: {r.text}")
-                            except Exception as model_e:
-                                print(f"Model {model_name} failed: {model_e}")
-                                last_error = str(model_e)
-                                if "404" not in str(model_e):
-                                    break # If it's a 400 (Bad Request), 403 (Permission), etc, stop trying to fall back. This is the real error!
-                                
+                        import urllib.parse
+                        encoded_prompt = urllib.parse.quote(img_prompt)
+                        poll_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1080&height=1350&nologo=true&model=flux"
+                        response = requests.get(poll_url)
+                        if response.status_code == 200:
+                            with open(bg_path, 'wb') as f:
+                                f.write(response.content)
+                            success = True
+                            print("Successfully generated with Pollinations AI")
+                        else:
+                            last_error = f"Pollinations Error {response.status_code}"
                     except Exception as e:
-                        print(f"Gemini Exception: {e}")
                         last_error = str(e)
+                        print(f"Pollinations Exception: {e}")
                             
                 if not success:
                     print(f"Image generation failed for slide {idx}. Skipping this topic.")
