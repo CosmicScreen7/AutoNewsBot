@@ -272,7 +272,16 @@ def process_new_rows(ws_planning, ws_memory):
                     for attempt in range(3):
                         try:
                             import requests
-                            response = requests.post(hf_url, headers=headers, json={"inputs": img_prompt})
+                            enhanced_prompt = img_prompt + ", masterpiece, 8k resolution, highly detailed, photorealistic, cinematic lighting, dramatic composition"
+                            payload = {
+                                "inputs": enhanced_prompt,
+                                "parameters": {
+                                    "width": 1024,
+                                    "height": 1024,
+                                    "num_inference_steps": 4
+                                }
+                            }
+                            response = requests.post(hf_url, headers=headers, json=payload)
                             if response.status_code == 200:
                                 with open(bg_path, 'wb') as f:
                                     f.write(response.content)
@@ -302,7 +311,7 @@ def process_new_rows(ws_planning, ws_memory):
                     print("Falling back to Pollinations AI (FLUX)...")
                     try:
                         import urllib.parse
-                        encoded_prompt = urllib.parse.quote(img_prompt)
+                        encoded_prompt = urllib.parse.quote(enhanced_prompt)
                         poll_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1080&height=1350&nologo=true&model=flux"
                         response = requests.get(poll_url)
                         if response.status_code == 200:
