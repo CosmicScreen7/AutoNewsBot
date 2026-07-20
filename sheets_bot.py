@@ -193,7 +193,7 @@ def process_new_rows(ws_planning, ws_memory):
     except:
         pass
         
-    rows = ws_planning.get_all_values()[1:]
+    rows = ws_planning.get_all_values()
     os.makedirs("output", exist_ok=True)
     
     memory_history = ws_memory.get_all_values()
