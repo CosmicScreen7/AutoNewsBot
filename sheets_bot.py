@@ -265,8 +265,8 @@ def process_new_rows(ws_planning, ws_memory):
                 # 1. Try Gemini Imagen 3
                 if GEMINI_API_KEY:
                     try:
-                        from google import genai
-                        client = genai.Client(api_key=GEMINI_API_KEY, http_options={'api_version': 'v1alpha'})
+                        import requests
+                        import base64
                         
                         models_to_try = [
                             'imagen-4.0-ultra-generate-001',
@@ -279,23 +279,26 @@ def process_new_rows(ws_planning, ws_memory):
                         
                         for model_name in models_to_try:
                             try:
-                                result = client.models.generate_images(
-                                    model=model_name,
-                                    prompt=img_prompt,
-                                    config=dict(
-                                        number_of_images=1,
-                                        aspect_ratio="3:4"
-                                    )
-                                )
-                                for generated_image in result.generated_images:
-                                    image_bytes = generated_image.image.image_bytes
-                                    with open(bg_path, 'wb') as f:
-                                        f.write(image_bytes)
-                                    success = True
-                                    break
-                                if success:
-                                    print(f"Successfully generated with model: {model_name}")
-                                    break
+                                url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:predict?key={GEMINI_API_KEY}"
+                                payload = {
+                                    "instances": [{"prompt": img_prompt}],
+                                    "parameters": {"sampleCount": 1, "aspectRatio": "3:4"}
+                                }
+                                r = requests.post(url, json=payload)
+                                if r.status_code == 200:
+                                    response_data = r.json()
+                                    if "predictions" in response_data and len(response_data["predictions"]) > 0:
+                                        base64_str = response_data["predictions"][0]["bytesBase64Encoded"]
+                                        image_bytes = base64.b64decode(base64_str)
+                                        with open(bg_path, 'wb') as f:
+                                            f.write(image_bytes)
+                                        success = True
+                                        print(f"Successfully generated with model: {model_name}")
+                                        break
+                                    else:
+                                        raise Exception(f"Unexpected response format: {r.text}")
+                                else:
+                                    raise Exception(f"HTTP {r.status_code}: {r.text}")
                             except Exception as model_e:
                                 print(f"Model {model_name} failed: {model_e}")
                                 last_error = str(model_e)
