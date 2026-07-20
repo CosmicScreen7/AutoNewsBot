@@ -269,10 +269,10 @@ def process_new_rows(ws_planning, ws_memory):
                         import base64
                         
                         models_to_try = [
+                            ('imagen-4.0-ultra-generate-001', 'generateContent'),
                             ('imagen-4.0-ultra-generate-001', 'predict'),
-                            ('imagen-4.0-generate-001', 'predict'),
-                            ('gemini-3-pro-image', 'generateContent'),
-                            ('gemini-3.1-flash-image', 'generateContent')
+                            ('imagen-4.0-generate-001', 'generateContent'),
+                            ('imagen-4.0-generate-001', 'predict')
                         ]
                         
                         last_error = ""
