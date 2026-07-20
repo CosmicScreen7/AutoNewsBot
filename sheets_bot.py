@@ -269,39 +269,52 @@ def process_new_rows(ws_planning, ws_memory):
                         import base64
                         
                         models_to_try = [
-                            'imagen-4.0-ultra-generate-001',
-                            'imagen-4.0-ultra-generate',
-                            'imagen-4.0-generate-001',
-                            'imagen-4.0-generate',
-                            'imagen-4.0-fast-generate-001',
-                            'imagen-4.0-fast-generate'
+                            ('imagen-4.0-ultra-generate-001', 'predict'),
+                            ('imagen-4.0-generate-001', 'predict'),
+                            ('gemini-3-pro-image', 'generateContent'),
+                            ('gemini-3.1-flash-image', 'generateContent')
                         ]
                         
-                        for model_name in models_to_try:
+                        last_error = ""
+                        for model_name, endpoint in models_to_try:
                             try:
-                                url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:predict?key={GEMINI_API_KEY}"
-                                payload = {
-                                    "instances": [{"prompt": img_prompt}],
-                                    "parameters": {"sampleCount": 1, "aspectRatio": "3:4"}
-                                }
+                                url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:{endpoint}?key={GEMINI_API_KEY}"
+                                if endpoint == 'predict':
+                                    payload = {
+                                        "instances": [{"prompt": img_prompt}],
+                                        "parameters": {"sampleCount": 1, "aspectRatio": "3:4"}
+                                    }
+                                else:
+                                    payload = {
+                                        "contents": [{"parts": [{"text": img_prompt}]}]
+                                    }
+                                    
                                 r = requests.post(url, json=payload)
                                 if r.status_code == 200:
                                     response_data = r.json()
-                                    if "predictions" in response_data and len(response_data["predictions"]) > 0:
+                                    if endpoint == 'predict' and "predictions" in response_data and len(response_data["predictions"]) > 0:
                                         base64_str = response_data["predictions"][0]["bytesBase64Encoded"]
-                                        image_bytes = base64.b64decode(base64_str)
-                                        with open(bg_path, 'wb') as f:
-                                            f.write(image_bytes)
-                                        success = True
-                                        print(f"Successfully generated with model: {model_name}")
-                                        break
+                                    elif endpoint == 'generateContent' and "candidates" in response_data:
+                                        try:
+                                            base64_str = response_data["candidates"][0]["content"]["parts"][0]["inlineData"]["data"]
+                                        except KeyError:
+                                            raise Exception(f"Unexpected generateContent format: {r.text}")
                                     else:
                                         raise Exception(f"Unexpected response format: {r.text}")
+                                        
+                                    image_bytes = base64.b64decode(base64_str)
+                                    with open(bg_path, 'wb') as f:
+                                        f.write(image_bytes)
+                                    success = True
+                                    print(f"Successfully generated with model: {model_name}")
+                                    break
                                 else:
                                     raise Exception(f"HTTP {r.status_code}: {r.text}")
                             except Exception as model_e:
                                 print(f"Model {model_name} failed: {model_e}")
                                 last_error = str(model_e)
+                                if "404" not in str(model_e):
+                                    break # If it's a 400 (Bad Request), 403 (Permission), etc, stop trying to fall back. This is the real error!
                                 
                     except Exception as e:
                         print(f"Gemini Exception: {e}")
