@@ -34,7 +34,7 @@ if GEMINI_API_KEY:
     try:
         import google.generativeai as genai
         genai.configure(api_key=GEMINI_API_KEY)
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        model = genai.GenerativeModel('gemini-3-flash')
     except Exception as e:
         print(f"Failed to initialize Gemini: {e}")
         model = None
@@ -251,10 +251,10 @@ def process_new_rows(ws_planning, ws_memory):
                     ai_data = parse_ai_response(res)
                 except Exception as e:
                     print(f"AI Parse Error: {e}")
-                    ai_data = {"format": "SINGLE", "headline": topic[:50], "summaries": ["Read more below!"], "caption": "Check out this news! 🚀", "hashtags": "#Tech #News", "tag": "NEWS"}
+                    ai_data = {"format": "SINGLE", "headline": topic[:50], "summaries": ["Read more below!"], "caption": "Check out this news! 🚀", "hashtags": "#Tech #News", "tag": "NEWS", "img_prompts": ["A futuristic technology background"]}
             else:
                 print("Skipping AI Generation because model is None")
-                ai_data = {"format": "SINGLE", "headline": topic[:50], "summaries": ["Read more below!"], "caption": "Check out this news! 🚀", "hashtags": "#Tech #News", "tag": "NEWS", "image_prompt": "A futuristic technology background"}
+                ai_data = {"format": "SINGLE", "headline": topic[:50], "summaries": ["Read more below!"], "caption": "Check out this news! 🚀", "hashtags": "#Tech #News", "tag": "NEWS", "img_prompts": ["A futuristic technology background"]}
             
             images_failed = False
             bg_paths = []
