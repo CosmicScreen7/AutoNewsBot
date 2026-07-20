@@ -3,3 +3,11 @@ Slide 0 Error: 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/imagen-
 Slide 0 Error: 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/imagen-4.0-fast-generate is not found for API version v1alpha, or is not supported for predict. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}
 Slide 0 Error: 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/imagen-4.0-fast-generate is not found for API version v1alpha, or is not supported for predict. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}
 Slide 0 Error: 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/imagen-4.0-fast-generate is not found for API version v1alpha, or is not supported for predict. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}
+Slide 0 Error: HTTP 404: {
+  "error": {
+    "code": 404,
+    "message": "models/imagen-4.0-fast-generate is not found for API version v1beta, or is not supported for predict. Call ModelService.ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
