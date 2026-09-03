@@ -599,6 +599,22 @@
       "maxTemperature": 2
     },
     {
+      "name": "models/lyria-3.5",
+      "version": "3.5",
+      "displayName": "Lyria 3.5",
+      "description": "Music Generation model",
+      "inputTokenLimit": 1048576,
+      "outputTokenLimit": 65536,
+      "supportedGenerationMethods": [
+        "generateContent",
+        "countTokens"
+      ],
+      "temperature": 1,
+      "topP": 0.95,
+      "topK": 64,
+      "maxTemperature": 2
+    },
+    {
       "name": "models/gemini-3.1-flash-tts-preview",
       "version": "3.1-flash-tts-preview",
       "displayName": "Gemini 3.1 Flash TTS Preview",
@@ -835,24 +851,7 @@
       "topK": 64,
       "maxTemperature": 2,
       "thinking": true
-    },
-    {
-      "name": "models/gemini-2.5-flash-native-audio-preview-09-2025",
-      "version": "gemini-2.5-flash-preview-native-audio-dialog-2025-05-19",
-      "displayName": "Gemini 2.5 Flash Native Audio Preview 09-2025",
-      "description": "Gemini 2.5 Flash Native Audio Preview 09-2025",
-      "inputTokenLimit": 131072,
-      "outputTokenLimit": 8192,
-      "supportedGenerationMethods": [
-        "countTokens",
-        "bidiGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2,
-      "thinking": true
     }
   ],
-  "nextPageToken": "CjRtb2RlbHMvZ2VtaW5pLTIuNS1mbGFzaC1uYXRpdmUtYXVkaW8tcHJldmlldy0wOS0yMDI1"
+  "nextPageToken": "Cittb2RlbHMvZ2VtaW5pLTIuNS1mbGFzaC1uYXRpdmUtYXVkaW8tbGF0ZXN0"
 }
